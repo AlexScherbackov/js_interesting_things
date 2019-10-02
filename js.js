@@ -1,37 +1,56 @@
 'use strict'
-function stripUrlParams(url, paramsToStrip){
-  const regExp = paramsToStrip ? new RegExp(`[${paramsToStrip.join('')}]=\\d`,'g') : null;
-  const urlParts = regExp ? url.split(/[?&]/).map(item => !regExp.test(item) ? item : '') : url.split(/[?&]/);
-  const siteUrl = urlParts[0];
-  const queryParams = urlParts.splice(1)
-  .map((item, index, arr) => {
-    let corresponceItemIndex = arr.findIndex((i, ind) => i[0] === item[0] && ind !== index);
-    let isItemUnique = corresponceItemIndex === -1;
 
-    if (isItemUnique || index === 0 || index < corresponceItemIndex) {
-      return item;
-    } 
-  })
-  .filter(item => item&&item.length > 0);
+class UXButton {
+  constructor() {
+    /*this.disabled = false;
+    this.focused = false;
+    this.hovered = false;
+    this.active = false;
+    this.hasIcon = false;*/
+    this.state = UXButton.State.DISABLED | UXButton.State.HAS_ICON;
+  }
 
-  return `${siteUrl}${queryParams.length ? '?' : ''}${queryParams.join("&")}`;
+  getClassName() {
+    let classNames = [];
+    /*//очень плохой подход
+    if( this.disabled) {
+      classNames.push('item-disabled');//так для каждого флага
+    }
+    //куча условных операторов = ужасный код, работающий не опттимально
+    */
+
+    //Можно использовать биттовые карты!
+    UXButton.StateClassName.forEach((className, state) => {
+      if(!!(this.state & state)){
+        classNames.push(className)
+      }
+    })
+
+    return classNames;
+  }
+
+  static get State() {
+    return {
+      DISABLED: 0X01,
+      FOCUSED: 0X02,
+      HOVERED: 0X04,
+      ACTIVE: 0X08,
+      HAS_ICON: 0X10,
+    }
+  }
+
+  static get StateClassName() {
+    return new Map ([
+      [UXButton.State.DISABLED, 'button-disable'],
+      [UXButton.State.FOCUSED, 'button-focused'],
+      [UXButton.State.HOVERED, 'button-hovered'],
+      [UXButton.State.ACTIVE, 'button-active'],
+      [UXButton.State.HAS_ICON, 'button-has-icon'],
+    ])
+  }
 }
 
-console.log(stripUrlParams('www.codewars.com?a=1&b=2&c=1&a=2&c=3'))
-
-var url1 = 'www.codewars.com?a=1&b=2'
-var url2 = 'www.codewars.com?a=1&b=2&a=1&b=3'
-var url3 = 'www.codewars.com?a=1'
-var url4 = 'www.codewars.com'
-
-console.log(stripUrlParams1(url1),stripUrlParams1(url1) == url1);
-console.log(stripUrlParams1(url2),stripUrlParams1(url2) == url1);
-console.log(stripUrlParams1(url2, ['b']), stripUrlParams1(url2, ['b']) == url3);
-console.log(stripUrlParams1(url4, ['b']),stripUrlParams1(url4, ['b']) == url4);
-
-
-function stripUrlParams1(url, paramsToStrip){
-  return url.replace(/&?([^?=]+)=.+?/g, function(m, p1, qPos) {
-    return url.indexOf(p1 + '=') < qPos || (paramsToStrip||[]).indexOf(p1) > -1 ? "": m;
-   });
-}
+const btn = new UXButton;
+console.log(btn)
+const classes = btn.getClassName();
+console.log(classes)
